@@ -17,7 +17,7 @@ struct Stats
 
 void* mylloc_full(size_t size_to_alloc, const char* file, int line);
 
-void myfree(void *ptr);
+void myfree(void *block);
 void dumpMemory(void);
 void getStats(struct Stats* stats);
 int initializeAllocator(void);
