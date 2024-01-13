@@ -2,57 +2,92 @@
 #include "../src/mylloc.h"
 #include <stdio.h>
 
-void test_mylloc_and_myfree() {
+
+
+void test_mylloc_and_myfree(void){
+
+    void *block = mylloc(20);
+    assert(block != NULL);
+    myfree(block);
+
+}
+
+void test_myfree_null(void){
+
+    myfree(NULL);
+
+}
+
+void test_mylloc_same_block(void){
+
+    void *block = mylloc(20);
+    assert(block != NULL);
+
+    myfree(block);
+
+    void *block2 = mylloc(20);
+    assert(block2 != NULL);
+
+    assert(block == block2);
+
+}
+
+void test_mylloc_divide_block(void){
+
+    void *block = mylloc(200);
+    assert(block != NULL);
+
+    myfree(block);
+
+    void *block2 = mylloc(20);
+    assert(block2 != NULL);
+
+}
+
+void test_myfree_merging(void){
+
+    void* block = mylloc(20);
+    assert(block != NULL);
+
+    void* block2 = mylloc(20);
+    assert(block2 != NULL);
+
+    myfree(block2);
+    myfree(block);
+}
+
+void test_getStats(void){
+
+    struct Stats stats;
+    getStats(&stats);
+
+    assert(stats.allocCalls == 7);
+    assert(stats.averageAllocatedBytes == 45);
+    assert(stats.peakMemory == 276);
+    assert(stats.totalAllocatedBytes == 320);
+    assert(stats.sbrkCalls == 4);
+
+}
+
+int main() {
 
     int status = initializeAllocator();
     if(status == -1){
         fprintf(stderr,"Error initializing allocator\n");
         exit(EXIT_FAILURE);
     }
-
-    void *block = mylloc(20);
-    assert(block != NULL);
-
-    void *block2 = mylloc(20);
-    assert(block2 != NULL);
+    test_mylloc_and_myfree();
+    test_myfree_null();
+    test_mylloc_same_block();
+    test_myfree_merging();
     
-    void *block3 = mylloc(220);
-    assert(block3 != NULL);
-
-    myfree(block3);
-
-    void *block4 = mylloc(2);
-    assert(block4 != NULL);
-
-    void *block5 = mylloc(20);
-    assert(block5 != NULL);
-
-    myfree(block2);
-    myfree(block4);
-    myfree(block5);
-    myfree(block);
-
-    void *block6 = mylloc(20);
-    assert(block6 != NULL);
-
-
-    myfree(NULL);
-
-    struct Stats stats;
-    getStats(&stats);
+    test_mylloc_divide_block();
 
     dumpMemory();
 
-    assert(stats.allocCalls == 6);
-    assert(stats.totalAllocatedBytes == 302);
-    assert(stats.peakMemory == 260);
-    assert(stats.averageAllocatedBytes == 50);
-    assert(stats.sbrkCalls == 3);
+    test_getStats();
 
-    printf("Test mylloc and myfree passed\n");
-}
-
-int main() {
-    test_mylloc_and_myfree();
     return 0;
 }
+
+
