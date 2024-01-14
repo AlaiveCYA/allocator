@@ -3,9 +3,9 @@ A custom allocator project
 By Szymon Rzewuski
 
 ## Table of contents
-  *[General info](#general-info)
-  *[Setup](#setup)
-  *[Examples](#examples)
+  * [General info](#general-info)
+  * [Setup](#setup)
+  * [Examples](#examples)
 
 ## General info
 A simple custom implementation of memory allocator similar to malloc.
