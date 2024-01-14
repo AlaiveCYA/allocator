@@ -2,7 +2,9 @@ import subprocess
 import unittest
 
 class TestMyAllocator(unittest.TestCase):
+    
     def test_allocator_correct(self):
+
         # Uruchomienie programu i przechwycenie stdout i stderr
         result = subprocess.run(['./e2etest_correct'], capture_output=True, text=True)
         stdout = result.stdout
