@@ -8,6 +8,8 @@ sudo apt-get install -y build-essential
 
 sudo apt-get install -y valgrind
 
+sudo apt-get install -y python3
+
 # Instalacja Clang i narzędzi związanych z Clang
 sudo apt-get install -y clang clang-tidy clang-tools
 
