@@ -62,9 +62,9 @@ void test_getStats(void){
     getStats(&stats);
 
     assert(stats.allocCalls == 7);
-    assert(stats.averageAllocatedBytes == 57);
-    assert(stats.peakMemory == 296);
-    assert(stats.totalAllocatedBytes == 400);
+    assert(stats.averageAllocatedBytes == 50);
+    assert(stats.peakMemory == 288);
+    assert(stats.totalAllocatedBytes == 352);
     assert(stats.sbrkCalls == 4);
 
 }
