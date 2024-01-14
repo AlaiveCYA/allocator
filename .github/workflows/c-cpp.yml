@@ -1,0 +1,24 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        flags: [-ggdb3, -O3]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: ./install_env.sh
+
+    - name: Build
+      env:
+        CC: ${{ matrix.compiler }}
+        CFLAGS: ${{ matrix.flags }}
+      run: |
+        make
