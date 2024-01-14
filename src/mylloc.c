@@ -185,7 +185,7 @@ void* mylloc_full(size_t size_to_alloc, const char* file, int line){
         {
             if (currentHeader->magicNumber != MAGIC_NUMBER)
             {
-                (void)fprintf(stderr, "Error: Broken block\n File: %s\n Line: %d\n Size: %zu\n", currentHeader->file, currentHeader->line, currentHeader->size);  
+                (void)fprintf(stderr, "Error: Broken block\n");  
                 abort();
 
             }
@@ -293,7 +293,7 @@ void myfree(void* block){
 
     if (header->magicNumber != MAGIC_NUMBER)
     {
-        (void)(void)fprintf(stderr, "Error: Broken block\n File: %s\n Line: %d\n Size: %zu\n", header->file, header->line, header->size);
+        (void)fprintf(stderr, "Error: Broken block\n");
         abort();
     }
 
