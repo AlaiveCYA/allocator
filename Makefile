@@ -15,7 +15,7 @@ XANALYZER_FLAGS = --analyze -Xanalyzer -analyzer-output=text
 all: regression clean
 
 unit_test: $(UNIT_OBJS) 
-	$(CC) $(CFLAGS) -fprofile-arcs -ftest-coverage $^ -o program
+	$(CC) $(CFLAGS) -fprofile-arcs -ftest-coverage $(UNIT_TEST_SRC) -o program
 
 e2e_test: $(OBJS) test/e2etest_correct.o test/e2etest_faulty.o
 	$(CC) $(CFLAGS) test/e2etest_correct.o $(OBJS) -o e2etest_correct
@@ -29,8 +29,8 @@ test: unit_test e2e_test
 	./program || exit 1;
 	python3 test/e2etest.py || exit 1;
 	
-analyze: program
-	gcov $(UNIT_TEST_SRC) || exit 1;
+analyze: test
+	gcov *.gcda || exit 1;
 	valgrind $(VALGRIND_FLAGS) ./program || exit 1; 
 	clang-tidy $(CLANG-TIDY_FLAGS) $(UNIT_TEST_SRC) || exit 1; 
 	scan-build $(SCAN-BUILD_FLAGS) make test || exit 1; 
@@ -49,7 +49,7 @@ analyze: program
 regression: test analyze
 
 clean:
-	rm -f $(UNIT_OBJS) $(E2E_OBJS) test/e2etest_correct.o test/e2etest_faulty.o src/*.gcda src/*.gcno test/*.gcda test/*.gcno a.out *.gcov program e2etest_correct e2etest_faulty
+	rm -f $(UNIT_OBJS) $(E2E_OBJS) test/e2etest_correct.o test/e2etest_faulty.o *.gcda *.gcno *.gcda *.gcno a.out *.gcov program e2etest_correct e2etest_faulty
 
 install:
 	sudo chmod +x ./install_env.sh

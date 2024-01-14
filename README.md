@@ -33,14 +33,14 @@ $ cd allocator
 ```
 and  run:
 ```
-$ make install
+$ make install DIR=/path/to/your/installation/folder
 ```
 or:
 ```
 $ chmod +x install_env.sh
 $ ./install_env.sh
 $ chmod +x install_lib.sh
-$ ./install_lib.sh 
+$ ./install_lib.sh /path/to/your/installation/folder
 ```
 then run
 ```
