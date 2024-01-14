@@ -9,8 +9,17 @@ By Szymon Rzewuski
 
 ## General info
 A simple custom implementation of memory allocator similar to malloc.
-Allocation is based on first fit algorithm and is using sbrk system call to change heap pointer.
-All allocations are round up to multiples of 8
+Allocation is based on first fit algorithm and is using sbrk system call to change heap pointer. All allocations are round up to multiples of 8.
+If you are not using clang or gcc you have to call initializeAllocator() before use. Allocator collects statistics from runtime and allows user to print them at the end of runtime or fetch them in struct.
+In this library, following functions are shared to user:
+
+mylloc(size)
+myfree(ptr)
+initializeAllocator()
+enableOutput()
+disableOutput()
+dumpMemory()
+
 ## Setup
 To use this library you have to do the following:
 
