@@ -1,6 +1,10 @@
 #include "../src/mylloc.h"
+#include <stdio.h>
 
 int main(void){
+
+    initializeAllocator();
+    enableOutput();
 
     int len = 10;
 
