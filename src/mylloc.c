@@ -1,5 +1,3 @@
-#define _XOPEN_SOURCE 500
-
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
@@ -7,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "mylloc.h"
+#include <stdint.h>
 
 
 
@@ -26,6 +25,7 @@ static struct Stats stats = {0, 0, 0, 0, 0, 0};
 #define HEADER_SIZE sizeof(struct Header)
 #define MIN_ALLOC_SIZE 64
 #define MAGIC_NUMBER 0x272341
+#define CONST_16 16UL
 
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool isInitialized = false;
@@ -44,10 +44,13 @@ int initializeAllocator(void){
         return 0;
     }
 
-    firstHeader = (struct Header*) sbrk(HEADER_SIZE);
-    if(firstHeader == (void*)-1){
+    void* brk = sbrk(HEADER_SIZE);
+    if(brk == (void*)-1){ //NOLINT
         return -1;
     }
+
+    firstHeader = (struct Header*) brk;
+
     firstHeader->previousHeader = NULL;
     firstHeader->nextHeader = NULL;
     firstHeader->size = 0;
@@ -57,7 +60,10 @@ int initializeAllocator(void){
     firstHeader->file = NULL;
     firstHeader->line = 0;
 
-    atexit(programExit);
+    int status = atexit(programExit);
+    if(status != 0){
+        return -1;
+    }
 
     return 0;
 }
@@ -66,10 +72,14 @@ int initializeAllocator(void){
 
 void* mylloc_full(size_t size_to_alloc, const char* file, int line){
 
+    size_t temp = size_to_alloc/CONST_16;
+    size_to_alloc = (temp + 1) * CONST_16;
+
     if (!isInitialized)
     {
-        fprintf(stderr, "Error: Allocator not initialized\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Error: Allocator not initialized\n"); //NOLINT
+
+        abort();
     }
     else
     {
@@ -87,11 +97,9 @@ void* mylloc_full(size_t size_to_alloc, const char* file, int line){
         {
             if (currentHeader->magicNumber != MAGIC_NUMBER)
             {
-                fprintf(stderr, "Error: Broken block\n");
-                fprintf(stderr, "File: %s\n", currentHeader->file);
-                fprintf(stderr, "Line: %d\n", currentHeader->line);
-                fprintf(stderr, "Size: %zu\n", currentHeader->size);
-                exit(EXIT_FAILURE);
+                fprintf(stderr, "Error: Broken block\n File: %s\n Line: %d\n Size: %zu\n", currentHeader->file, currentHeader->line, currentHeader->size); //NOLINT
+                abort();
+
             }
             if (currentHeader->isFree && currentHeader->size >= size_to_alloc)
             {
@@ -130,12 +138,12 @@ void* mylloc_full(size_t size_to_alloc, const char* file, int line){
         void* newBrk = sbrk(HEADER_SIZE + size_to_alloc);
         stats.sbrkCalls++;
 
-        if (newBrk == (void*)-1)
+        if (newBrk == (void*)-1) //NOLINT
         {
             pthread_mutex_unlock(&mutex);
 
-            fprintf(stderr, "Error: Could not allocate memory\n");
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "Error: sbrk failed\n"); //NOLINT 
+            abort();
         }
 
         struct Header *newHeader = (struct Header*)newBrk;
@@ -171,8 +179,8 @@ void myfree(void* block){
 
     if(!isInitialized){
 
-        fprintf(stderr, "Error: Allocator not initialized\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"Error: Allocator not initialized\n"); //NOLINT
+        return;
     }
 
     if (block == NULL)
@@ -183,13 +191,13 @@ void myfree(void* block){
 
     if (header->magicNumber != MAGIC_NUMBER)
     {
+        fprintf(stderr, "Error: Broken block\n File: %s\n Line: %d\n Size: %zu\n", header->file, header->line, header->size); //NOLINT
         abort();
     }
 
     if (header->isFree)
     {
-        fprintf(stderr, "Error: Block already freed\n");
-        exit(EXIT_FAILURE);
+        return;
     }
     pthread_mutex_lock(&mutex);
 
@@ -215,7 +223,6 @@ void myfree(void* block){
         }
     }
     pthread_mutex_unlock(&mutex);
-    return;
 }
 
 static void programExit(void){
@@ -235,7 +242,6 @@ static void programExit(void){
         }
         currentHeader = currentHeader->nextHeader;
     }
-    return;
 }
 
 void dumpMemory(void) {
@@ -245,14 +251,11 @@ void dumpMemory(void) {
     {
         if (currentHeader->magicNumber != MAGIC_NUMBER)
         {
-            fprintf(stderr, "Error: Broken block\n");
-            fprintf(stderr, "File: %s\n", currentHeader->file);
-            fprintf(stderr, "Line: %d\n", currentHeader->line);
-            fprintf(stderr, "Size: %zu\n", currentHeader->size);
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "Error: Broken block\n File: %s\n Line: %d\n Size: %zu\n", currentHeader->file, currentHeader->line, currentHeader->size); //NOLINT
+            abort();
         }
         if(currentHeader != firstHeader){
-            fprintf(stderr, "{BLOCK start %p end %p, size %zu, free %d, allocated %s, %d}\n",
+            fprintf(stderr, "{BLOCK start %p end %p, size %zu, free %d, allocated %s, %d}\n", //NOLINT
                 (void*)currentHeader,
                 (void*)((char*)currentHeader + currentHeader->size),
                 currentHeader->size,

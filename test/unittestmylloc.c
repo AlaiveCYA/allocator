@@ -62,9 +62,9 @@ void test_getStats(void){
     getStats(&stats);
 
     assert(stats.allocCalls == 7);
-    assert(stats.averageAllocatedBytes == 45);
-    assert(stats.peakMemory == 276);
-    assert(stats.totalAllocatedBytes == 320);
+    assert(stats.averageAllocatedBytes == 57);
+    assert(stats.peakMemory == 296);
+    assert(stats.totalAllocatedBytes == 400);
     assert(stats.sbrkCalls == 4);
 
 }
@@ -73,8 +73,8 @@ int main() {
 
     int status = initializeAllocator();
     if(status == -1){
-        fprintf(stderr,"Error initializing allocator\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"Error initializing allocator\n"); //NOLINT
+        abort();
     }
     test_mylloc_and_myfree();
     test_myfree_null();
