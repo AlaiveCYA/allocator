@@ -46,8 +46,13 @@ analyze: program
 	scan-build $(SCAN-BUILD_FLAGS) make test || exit 1; 
 	clang $(XANALYZER_FLAGS) $(UNIT_TEST_SRC) || exit 1; 
 	clang -fsanitize=address $(UNIT_TEST_SRC) || exit 1;
+	./a.out || exit 1;
 	clang -fsanitize=memory $(UNIT_TEST_SRC) || exit 1;
+	./a.out || exit 1;
+	clang -fsanitize=thread $(UNIT_TEST_SRC) || exit 1;
+	./a.out || exit 1;
 	clang -fsanitize=undefined $(UNIT_TEST_SRC) || exit 1; 
+	./a.out || exit 1;
 
 # Cel regression
 regression: test analyze

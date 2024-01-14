@@ -40,5 +40,3 @@ to see if everything has been installed properly
 
 ## Examples
 Here is basic script
-   
-
