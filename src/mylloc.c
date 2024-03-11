@@ -47,7 +47,7 @@ struct Header
     int line;
 };
 
-static struct allocatorStats stats = {0, 0, 0, 0, 0, 0, false};
+static allocatorStats_t stats = {0, 0, 0, 0, 0, 0, false};
 
 #define HEADER_SIZE sizeof(struct Header)
 #define MIN_ALLOC_SIZE 64UL
