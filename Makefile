@@ -12,7 +12,7 @@ CLANG-TIDY_FLAGS = --quiet -checks=bugprone-*,-bugprone-easily-swappable-paramet
 SCAN-BUILD_FLAGS = --status-bugs --keep-cc --show-description
 XANALYZER_FLAGS = --analyze -Xanalyzer -analyzer-output=text
 
-all: regression clean
+build: regression clean
 
 unit_test: $(UNIT_OBJS) 
 	$(CC) $(CFLAGS) -fprofile-arcs -ftest-coverage $(UNIT_TEST_SRC) -o program
@@ -57,4 +57,4 @@ install:
 	./install_env.sh
 	./install_lib.sh $(DIR)
 
-.PHONY: all test analyze regression clean install
+.PHONY: build test analyze regression clean install

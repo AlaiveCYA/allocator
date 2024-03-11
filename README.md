@@ -1,3 +1,5 @@
+[![CI](https://github.com/AlaiveCYA/allocator/actions/workflows/ci.yml/badge.svg)](https://github.com/AlaiveCYA/allocator/actions/workflows/ci.yml)
+
 # Custom Allocator
 A custom allocator project
 By Szymon Rzewuski
@@ -53,7 +55,7 @@ Here are example programs with utilities:
 
 1. Basic allocation
 ```
-$ #include "mylloc.h"
+$ #include <mylloc.h>
 $ #include <stdio.h>
 $ 
 $ int main(void){
@@ -64,7 +66,7 @@ $ }
 
 2. Basic deallocation
 ```
-$ #include "mylloc.h"
+$ #include <mylloc.h>
 $ #include <stdio.h>
 $ 
 $ int main(void){
@@ -76,7 +78,7 @@ $ }
 
 3. Memory dump
 ```
-$ #include "mylloc.h"
+$ #include <mylloc.h>
 $ #include <stdio.h>
 $ 
 $ int main(void){
