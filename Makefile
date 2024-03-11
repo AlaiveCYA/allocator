@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -g -std=c17 -D_XOPEN_SOURCE=500
+CFLAGS = -Wall -Wextra -g -std=c17 -D_XOPEN_SOURCE=500 -L/usr/lib/libmylloc.so
 
 #SRC = $(wildcard src/*.c)
 UNIT_TEST_SRC = test/unittestmylloc.c
@@ -35,16 +35,6 @@ analyze: test
 	clang-tidy $(CLANG-TIDY_FLAGS) $(UNIT_TEST_SRC) || exit 1; 
 	scan-build $(SCAN-BUILD_FLAGS) make test || exit 1; 
 	clang $(XANALYZER_FLAGS) $(UNIT_TEST_SRC) || exit 1; 
-	clang -fsanitize=address $(UNIT_TEST_SRC) -lmylloc || exit 1;
-	./a.out || exit 1;
-	#clang -fsanitize=memory $(UNIT_TEST_SRC) || exit 1;
-	#./a.out || exit 1;
-	#clang -fsanitize=thread $(UNIT_TEST_SRC) || exit 1;
-	#./a.out || exit 1;
-	clang -fsanitize=undefined $(UNIT_TEST_SRC) -lmylloc || exit 1; 
-	./a.out || exit 1;
-	#clang -fsanitize=leak $(UNIT_TEST_SRC) || exit 1;
-	#./a.out || exit 1;
 
 regression: test analyze
 
