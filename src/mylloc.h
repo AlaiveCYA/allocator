@@ -6,7 +6,7 @@
 
 #define mylloc(size_to_alloc) mylloc_full(size_to_alloc, __FILE__, __LINE__)
 
-typedef struct allocatorStats
+typedef struct
 {
     size_t allocCalls;
     size_t totalAllocatedBytes;

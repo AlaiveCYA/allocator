@@ -58,7 +58,7 @@ void test_myfree_merging(void){
 
 void test_getStats(void){
 
-    struct Stats stats;
+    allocatorStats_t stats;
     getStats(&stats);
 
     assert(stats.allocCalls == 7);
