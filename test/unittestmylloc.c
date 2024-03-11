@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "../src/mylloc.h"
+#include <mylloc.h>
 #include <stdio.h>
 
 
@@ -69,7 +69,7 @@ void test_getStats(void){
 
 }
 
-int main() {
+int main(void) {
 
     int status = initializeAllocator();
     if(status == -1){
