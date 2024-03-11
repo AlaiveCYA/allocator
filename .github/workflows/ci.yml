@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -17,4 +17,4 @@ jobs:
         CC: ${{ matrix.compiler }}
       run: |
         ./install_env.sh
-        make
+        make build
