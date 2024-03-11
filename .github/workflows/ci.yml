@@ -16,5 +16,5 @@ jobs:
       env:
         CC: ${{ matrix.compiler }}
       run: |
-        ./install_env.sh
+        make install
         make build
