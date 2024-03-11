@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "mylloc.h"
 #include <stdint.h>
+
+#include "mylloc.h"
+
 
 
 /**
@@ -36,7 +38,7 @@
 
 struct Header
 {
-    unsigned int magicNumber;
+    unsigned long magicNumber;
     struct Header* previousHeader;
     struct Header* nextHeader;
     size_t size;
@@ -45,21 +47,21 @@ struct Header
     int line;
 };
 
-static struct Stats stats = {0, 0, 0, 0, 0, 0, false};
+static struct allocatorStats stats = {0, 0, 0, 0, 0, 0, false};
 
 #define HEADER_SIZE sizeof(struct Header)
 #define MIN_ALLOC_SIZE 64UL
 #define CONST_8 8UL
-
-struct Header *basicHeader = {0x272341, NULL, NULL, 0, true, __FILE__, __LINE__};
+#define MAGIC_NUMBER 0x272341UL
 
 static struct {
-    const uint32_t MAGIC_NUMBER;
     pthread_mutex_t mutex;
     bool isInitialized;
     struct Header *firstHeader;
     size_t currentAllocatedMemory;
-} allocator = {0x272341,PTHREAD_MUTEX_INITIALIZER, false, NULL, 0};
+} allocator = {.mutex = PTHREAD_MUTEX_INITIALIZER, .isInitialized = false, .firstHeader = NULL, .currentAllocatedMemory = 0};
+
+struct Header basicHeader = {MAGIC_NUMBER, NULL, NULL, 0, true, __FILE__, __LINE__};
 
 static void programExit(void);
 
@@ -94,19 +96,17 @@ int initializeAllocator(void) {
         abort();
     }
 
-    struct Header* firstHeader = allocator.firstHeader;
-    firstHeader = (struct Header*) brk;
-    firstHeader = basicHeader;
+    allocator.firstHeader = (struct Header*) brk;
+    *(allocator.firstHeader) = basicHeader;
 
-    firstHeader->previousHeader = NULL;
-    firstHeader->nextHeader = NULL;
-    firstHeader->size = 0;
-    firstHeader->isFree = true;
+    allocator.firstHeader->previousHeader = NULL;
+    allocator.firstHeader->nextHeader = NULL;
+    allocator.firstHeader->size = 0;
+    allocator.firstHeader->isFree = true;
     allocator.isInitialized = true;
-    firstHeader->magicNumber = allocator.MAGIC_NUMBER;
-    firstHeader->file = NULL;
-    firstHeader->line = 0;
-
+    allocator.firstHeader->magicNumber = MAGIC_NUMBER;
+    allocator.firstHeader->file = NULL;
+    allocator.firstHeader->line = 0;
     int status = atexit(programExit);
     if(status != 0){
         (void)fprintf(stderr,"Error: Could not register exit handler\n");  
@@ -165,7 +165,7 @@ void disableOutput(void){
  * If the allocator is not initialized, the function aborts the program with an error message.
  * If the block is broken, the function aborts the program with an error message.
 */
-void* mylloc_full(size_t size_to_alloc, const char* file, const int line){
+void* mylloc_full(size_t size_to_alloc, const char* file, int line){
 
     size_t temp = size_to_alloc/CONST_8;
     size_to_alloc = (temp + 1) * CONST_8;
@@ -185,11 +185,9 @@ void* mylloc_full(size_t size_to_alloc, const char* file, const int line){
 
         pthread_mutex_lock(&allocator.mutex);
 
-        
-
         while (currentHeader != NULL)
         {
-            if (currentHeader->magicNumber != allocator.MAGIC_NUMBER)
+            if (currentHeader->magicNumber != MAGIC_NUMBER)
             {
                 (void)fprintf(stderr, "Error: Broken block\n");  
                 abort();
@@ -199,8 +197,9 @@ void* mylloc_full(size_t size_to_alloc, const char* file, const int line){
             {
                 if (currentHeader->size >= size_to_alloc + HEADER_SIZE + MIN_ALLOC_SIZE)
                 {        
-
                     struct Header *newHeader = (struct Header*)((char*)currentHeader + HEADER_SIZE + size_to_alloc);
+
+                    *newHeader = basicHeader;
 
                     newHeader->previousHeader = currentHeader;
                     newHeader->nextHeader = currentHeader->nextHeader;
@@ -208,7 +207,7 @@ void* mylloc_full(size_t size_to_alloc, const char* file, const int line){
                     newHeader->isFree = true;
                     newHeader->file = file;
                     newHeader->line = line;
-                    newHeader->magicNumber = allocator.MAGIC_NUMBER;
+                    newHeader->magicNumber = MAGIC_NUMBER;
 
                     currentHeader->nextHeader = newHeader;
                     currentHeader->size = size_to_alloc;
@@ -241,7 +240,7 @@ void* mylloc_full(size_t size_to_alloc, const char* file, const int line){
         }
 
         struct Header *newHeader = (struct Header*)newBrk;
-        newHeader = basicHeader;
+        *newHeader = basicHeader;
 
         newHeader->previousHeader = previousHeader;
         newHeader->nextHeader = NULL;
@@ -249,7 +248,7 @@ void* mylloc_full(size_t size_to_alloc, const char* file, const int line){
         newHeader->isFree = false;
         newHeader->file = file;
         newHeader->line = line;
-        newHeader->magicNumber = allocator.MAGIC_NUMBER;
+        newHeader->magicNumber = MAGIC_NUMBER;
 
         if (previousHeader != NULL)
         {
@@ -298,7 +297,7 @@ void myfree(void* block){
     }
     struct Header *header = (struct Header*)block - 1;
 
-    if (header->magicNumber != allocator.MAGIC_NUMBER)
+    if (header->magicNumber != MAGIC_NUMBER)
     {
         (void)fprintf(stderr, "Error: Broken block\n");
         abort();
@@ -410,7 +409,7 @@ void dumpMemory(void) {
     pthread_mutex_lock(&allocator.mutex);
     while (currentHeader != NULL)
     {
-        if (currentHeader->magicNumber != allocator.MAGIC_NUMBER)
+        if (currentHeader->magicNumber != MAGIC_NUMBER)
         {
             (void)fprintf(stderr, "Error: Broken block\n File: %s\n Line: %d\n Size: %zu\n", currentHeader->file, currentHeader->line, currentHeader->size);  
             abort();
@@ -446,7 +445,7 @@ void dumpMemory(void) {
  * Peak memory usage in bytes
  * If the allocator is not initialized, the function aborts the program with an error message.
 */
-void getStats(struct Stats* stats_out) {
+void getStats(allocatorStats_t* stats_out) {
     if(!allocator.isInitialized){
         (void)fprintf(stderr,"Error: Allocator not initialized\n");  
         abort();

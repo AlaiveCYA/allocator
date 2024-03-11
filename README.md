@@ -1,8 +1,8 @@
+# Custom Allocator
 [![CI](https://github.com/AlaiveCYA/allocator/actions/workflows/ci.yml/badge.svg)](https://github.com/AlaiveCYA/allocator/actions/workflows/ci.yml)
 
-# Custom Allocator
 A custom allocator project
-By Szymon Rzewuski
+by Szymon Rzewuski
 
 ## Table of contents
   * [General info](#general-info)
@@ -23,7 +23,7 @@ disableOutput()
 dumpMemory()
 
 ## Setup
-To use this library you have to do the following:
+To use this library:
 
 1. Clone this repository using:
 ```
@@ -87,3 +87,10 @@ $   char* string = (char*)mylloc(sizeof(char)*5);
 $   dumpMemory();   
 $ }
 ```
+
+## Statistics
+
+Allocator collects data from runtime and allows user to output them. Here is an example
+from examples/binary_tree.c
+
+![Alt text](png/stats.png?raw=true "Binary Tree Statistics")

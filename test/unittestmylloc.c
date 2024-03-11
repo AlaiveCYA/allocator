@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "../src/mylloc.h"
+#include <mylloc.h>
 #include <stdio.h>
 
 

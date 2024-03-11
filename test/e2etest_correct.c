@@ -1,4 +1,4 @@
-#include "../src/mylloc.h"
+#include <mylloc.h>
 #include <stdio.h>
 
 int main(void){

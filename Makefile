@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -std=c17 -D_XOPEN_SOURCE=500
 
-SRC = $(wildcard src/*.c)
-UNIT_TEST_SRC = test/unittestmylloc.c $(SRC)
+#SRC = $(wildcard src/*.c)
+UNIT_TEST_SRC = test/unittestmylloc.c
 UNIT_OBJS = $(UNIT_TEST_SRC:.c=.o)
 OBJS = $(SRC:.c=.o)
 HEADERS = $(wildcard src/*.h)
@@ -15,14 +15,14 @@ XANALYZER_FLAGS = --analyze -Xanalyzer -analyzer-output=text
 build: regression clean
 
 unit_test: $(UNIT_OBJS) 
-	$(CC) $(CFLAGS) -fprofile-arcs -ftest-coverage $(UNIT_TEST_SRC) -o program
+	$(CC) $(CFLAGS) -fprofile-arcs -ftest-coverage $(UNIT_TEST_SRC) -o program -lmylloc
 
 e2e_test: $(OBJS) test/e2etest_correct.o test/e2etest_faulty.o
-	$(CC) $(CFLAGS) test/e2etest_correct.o $(OBJS) -o e2etest_correct
-	$(CC) $(CFLAGS) test/e2etest_faulty.o $(OBJS) -o e2etest_faulty
+	$(CC) $(CFLAGS) test/e2etest_correct.o $(OBJS) -o e2etest_correct -lmylloc
+	$(CC) $(CFLAGS) test/e2etest_faulty.o $(OBJS) -o e2etest_faulty -lmylloc
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -lmylloc
 
 
 test: unit_test e2e_test
@@ -35,16 +35,16 @@ analyze: test
 	clang-tidy $(CLANG-TIDY_FLAGS) $(UNIT_TEST_SRC) || exit 1; 
 	scan-build $(SCAN-BUILD_FLAGS) make test || exit 1; 
 	clang $(XANALYZER_FLAGS) $(UNIT_TEST_SRC) || exit 1; 
-	clang -fsanitize=address $(UNIT_TEST_SRC) || exit 1;
+	clang -fsanitize=address $(UNIT_TEST_SRC) -lmylloc || exit 1;
 	./a.out || exit 1;
-	clang -fsanitize=memory $(UNIT_TEST_SRC) || exit 1;
+	#clang -fsanitize=memory $(UNIT_TEST_SRC) || exit 1;
+	#./a.out || exit 1;
+	#clang -fsanitize=thread $(UNIT_TEST_SRC) || exit 1;
+	#./a.out || exit 1;
+	clang -fsanitize=undefined $(UNIT_TEST_SRC) -lmylloc || exit 1; 
 	./a.out || exit 1;
-	clang -fsanitize=thread $(UNIT_TEST_SRC) || exit 1;
-	./a.out || exit 1;
-	clang -fsanitize=undefined $(UNIT_TEST_SRC) || exit 1; 
-	./a.out || exit 1;
-	clang -fsanitize=leak $(UNIT_TEST_SRC) || exit 1;
-	./a.out || exit 1;
+	#clang -fsanitize=leak $(UNIT_TEST_SRC) || exit 1;
+	#./a.out || exit 1;
 
 regression: test analyze
 

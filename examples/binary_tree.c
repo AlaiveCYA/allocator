@@ -47,6 +47,10 @@ void free_tree(struct Node* root) {
 }
 
 int main() {
+
+    initializeAllocator();
+    enableOutput();
+
     struct Node* root = NULL;
     root = insert(root, 50);
     insert(root, 30);
@@ -58,6 +62,9 @@ int main() {
 
     printf("Inorder traversal of the binary search tree: ");
     inorder_traversal(root);
+    printf("\n");
+
+    free_tree(root);
 
     return 0;
 }
